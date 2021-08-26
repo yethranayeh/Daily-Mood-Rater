@@ -47,11 +47,17 @@ class Application(QMainWindow):
 
     def save_to_db(self):
         # TODO: Show a prompt that says whether data entry was successful. Also show what was entered into database.
-        # TODO: If a rating was already entered for the current day, show warning box with OK | Cancel that it will override the existing entry.
-        mood_db.save_values(
-            self.ui.slider_mood.sliderPosition(),
-            self.ui.textEdit_description.toPlainText()
-        )
+        
+        save = mood_db.save_values(
+                self.ui.slider_mood.sliderPosition(),
+                self.ui.textEdit_description.toPlainText()
+            )
+        if save == 0:
+            # TODO: If a rating was already entered for the current day, show warning box with OK | Cancel that it will override the existing entry.
+            pass
+        else:
+            # PROMPT, Data entered succesfully. The data you entered:
+            pass
 
     def show_chart(self):
         # TODO: if not mood_db.show_values():pass ; else: create a for loop for a chart with retrieved values from database
