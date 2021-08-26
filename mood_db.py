@@ -3,10 +3,9 @@ from datetime import datetime
 
 try:
     connection = sqlite3.connect("mood.db")
-    connected = True
 except Exception as err:
-    print("\033[1;31;40mThe application faced a problem while trying to create or connect to the database.\033[0;37;40m")
-    connected = False
+    print("\033[1;37;40mThe application faced a problem while trying to create or connect to the database:\033[0;37;40m")
+    print("\033[1;31;40m", err, "\033[0;37;40m")
     import sys
     sys.exit()
 
@@ -18,15 +17,20 @@ def create_table():
         description TEXT,
         date TEXT
         )""")
+
     connection.commit()
 
 def save_values(mood:int, description=""):
-    cursor.execute(f"INSERT INTO moods VALUES ({mood}, '{description}', '{str(datetime.now())[:19]}')")
+    cursor.execute(
+        "INSERT INTO moods VALUES (:mood, :desc, :date)", 
+        {"mood":mood, "desc":description, "date":str(datetime.now())[:19]})
+
     connection.commit()
 
 def show_values():
     cursor.execute("SELECT * FROM moods")
     result = cursor.fetchall()
+
     return result
 
 try:

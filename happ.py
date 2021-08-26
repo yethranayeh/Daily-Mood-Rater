@@ -1,9 +1,12 @@
 import sys, mood_db
-from pathlib import Path
+# from pathlib import Path
 # from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStatusBar
 # from PyQt5.QtGui import QIcon
 from interface import Ui_MainWindow
+
+#BUG: Clicking on anywhere on the slider makes it go to either 0 or 10
+#BUG: Slider is scrollable with mouse scroll. Also, scrolling with mouse does not invoke sliderMoved, so the label does not update the text
 
 class Application(QMainWindow):
     def __init__(self):
@@ -44,6 +47,7 @@ class Application(QMainWindow):
 
     def save_to_db(self):
         # TODO: Show a prompt that says whether data entry was successful. Also show what was entered into database.
+        # TODO: If a rating was already entered for the current day, show warning box with OK | Cancel that it will override the existing entry.
         mood_db.save_values(
             self.ui.slider_mood.sliderPosition(),
             self.ui.textEdit_description.toPlainText()
