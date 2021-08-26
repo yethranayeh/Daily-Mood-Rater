@@ -126,3 +126,9 @@ dmypy.json
 
 # PyQt5
 *.ui
+
+# database
+*.db
+
+# other
+test.py
