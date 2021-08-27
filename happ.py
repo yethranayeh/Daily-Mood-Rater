@@ -65,24 +65,53 @@ class Application(QMainWindow):
     def show_graph(self):
         # TODO: if not mood_db.show_values():pass ; else: create a for loop for a chart with retrieved values from database
         values = mood_db.show_values()
+
         if not values:
             print("There are currently no mood ratings saved in database.")
         else:
             print("\033[1;37;40mCurrent values in database:\033[0;37;40m")
             x = [x[-1] for x in values]
             y = [y[0] for y in values]
+            ax1 = plt.subplot2grid((1,1), (0,0))
+
             print("x:", x)
             print("y:", y)
-            plt.plot(x, y)
-            plt.show()
-            # for each in values:
-            #     print(each)
 
-def app_window():
+            plt.ion()
+            ax1.bar(x, y, color="lightsteelblue", edgecolor="black", width=0.95)
+
+            for label in ax1.xaxis.get_ticklabels():
+                label.set_rotation(45)
+        
+            ax1.tick_params(axis="x", colors="tab:blue")
+            ax1.tick_params(axis="y", colors="tab:blue")
+
+            ax1.xaxis.label.set_color("tab:blue")
+            plt.xlabel("Days (Year - Month - Day)")
+
+            ax1.yaxis.label.set_color("tab:blue")
+            plt.ylabel("Mood Rating")
+
+            plt.title("Your Mood Rating Graph")
+
+            plt.yticks([1,2,3,4,5,6,7,8,9,10]) # Only shows the available Y values
+            plt.subplots_adjust(left=0.097, bottom=0.23, right=0.977, top=0.922)
+            plt.show()
+
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     win = Application()
     win.show()
     sys.exit(app.exec_())
 
-app_window()
+
+# def app_window():
+#     app = QApplication(sys.argv)
+#     app.setStyle("Fusion")
+#     win = Application()
+#     win.show()
+#     sys.exit(app.exec_())
+
+# app_window()
