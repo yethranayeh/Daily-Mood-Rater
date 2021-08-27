@@ -2,7 +2,7 @@ import sys, mood_db
 import matplotlib.pyplot as plt
 # from pathlib import Path
 # from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QStatusBar
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 # from PyQt5.QtGui import QIcon
 from interface import Ui_MainWindow
 
@@ -25,10 +25,9 @@ class Application(QMainWindow):
 
 
 
-        # Functionality
+        ### Functionality ###
         self.ui.slider_mood.sliderMoved.connect(self.label_update)
 
-        # TODO: text edit will be disabled by default. so change it to setEnabled when connecting
         self.ui.checkBox_mood.stateChanged.connect(self.enable_text)
         
         # Send slider position and description to database
@@ -47,23 +46,53 @@ class Application(QMainWindow):
             self.ui.textEdit_description.clear()
             self.ui.textEdit_description.setDisabled(True)
 
-    def save_to_db(self):
-        # TODO: Show a prompt that says whether data entry was successful. Also show what was entered into database.
-        
+    def save_to_db(self):        
         save = mood_db.save_values(
                 self.ui.slider_mood.sliderPosition(),
                 self.ui.textEdit_description.toPlainText()
             )
-        if save == 0:
-            # TODO: If a rating was already entered for the current day, show warning box with OK | Cancel that it will override the existing entry.
-            print("Save was unsuccessful because an entry for today already exists!")
-            print("Would you like to override it? \033[1;31;40m[y/n]\033[0;37;40m")
+
+        if save != 1:
+            # Cannot save because an entry already exists
+            # A prompt to ask whether user wants to update current entry or cancel
+            msg = QMessageBox()
+
+            msg.setWindowTitle("Overwrite current entry?")
+            msg.setText(f"There is already an existing entry for today. Would you like to overwrite it?")
+            msg.setDetailedText(f"Mood Rating: {save[0]}\nDescription: {save[1]}\nDate: {save[2]}")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            msg.setDefaultButton(QMessageBox.Cancel)
+
+            response = msg.exec_()
+
+            # If user clicks OK, overwrite the current entry
+            if response == QMessageBox.Ok:
+                try:
+                    mood_db.update_values(
+                        self.ui.slider_mood.sliderPosition(),
+                        self.ui.textEdit_description.toPlainText()
+                    )
+                    # TODO: Show Entry update was successful in status bar
+                except:
+                    # TODO: Show Entry update was unsuccessful in status bar
+                    pass
+            elif response == QMessageBox.Cancel:
+                pass
+            else:
+                raise Exception(f"Unhandled Exception! Something went wrong.\nQMessageBox responded with: {response}\nExpected: QMessageBox.Ok or QMessageBox.Cancel\n\033[1;37;40mPlease let me know about this error so I can work on it ^^\033[0;37;40m")
         else:
-            # PROMPT, Data entered succesfully. The data you entered:
-            print("Data entry successful")
+            msg = QMessageBox()
+
+            msg.setWindowTitle("Success!")
+            msg.setText("Your mood rating for today was successfully saved into the database.")
+            msg.setIcon(QMessageBox.Information)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setDefaultButton(QMessageBox.Ok)
+
+
 
     def show_graph(self):
-        # TODO: if not mood_db.show_values():pass ; else: create a for loop for a chart with retrieved values from database
         values = mood_db.show_values()
 
         if not values:
