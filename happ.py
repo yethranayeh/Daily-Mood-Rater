@@ -1,14 +1,16 @@
 import sys, mood_db
-import matplotlib.pyplot as plt
-# from pathlib import Path
-# from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
-# from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon
 from interface import Ui_MainWindow
+from pathlib import Path
+
+cur_dir = Path.cwd()
 
 #TODO: Change button "Show Chart" to "Show Graph"
-#BUG: Clicking on anywhere on the slider makes it go to either 0 or 10
-#BUG: Slider is scrollable with mouse scroll. Also, scrolling with mouse does not invoke sliderMoved, so the label does not update the text
+
+#TODO: Check Qt event filter for these bugs.
+    #BUG: Clicking on anywhere on the slider makes it go to either 0 or 10
+    #BUG: Slider is scrollable with mouse scroll. Also, scrolling with mouse does not invoke sliderMoved, so the label does not update the text
 
 class Application(QMainWindow):
     def __init__(self):
@@ -17,12 +19,14 @@ class Application(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # Icon customization: https://thenounproject.com/term/faces/4127357/
+        self.setWindowIcon(QIcon((cur_dir / "test/icon.png").as_posix()))
+
         #  TODO: Show current date on status bar
         # self.setStatusBar(QStatusBar(self).setStatusTip("string"))
 
         self.ui.lbl_mood.setText(f"Rate Your Mood - {self.ui.slider_mood.sliderPosition()}")
         self.ui.textEdit_description.setToolTip("You can describe how you feel")
-
 
 
         ### Functionality ###
@@ -90,24 +94,27 @@ class Application(QMainWindow):
             msg.setStandardButtons(QMessageBox.Ok)
             msg.setDefaultButton(QMessageBox.Ok)
 
-
-
     def show_graph(self):
         values = mood_db.show_values()
 
         if not values:
             print("There are currently no mood ratings saved in database.")
         else:
+            import matplotlib.pyplot as plt
+            import mplcursors
             print("\033[1;37;40mCurrent values in database:\033[0;37;40m")
-            x = [x[-1] for x in values]
+            x = [x[2] for x in values]
             y = [y[0] for y in values]
+            descriptions = [d[1] for d in values]
+            print("Descriptions:", descriptions)
             ax1 = plt.subplot2grid((1,1), (0,0))
 
-            print("x:", x)
-            print("y:", y)
+            # print("x:", x)
+            # print("y:", y)
 
-            plt.ion()
-            ax1.bar(x, y, color="lightsteelblue", edgecolor="black", width=0.95)
+            plt.ion() # This solves a Qt Exec error. Without this, more than 1 instance of QApplication is being attempted to run.
+
+            lines = ax1.bar(x, y, color="lightsteelblue", edgecolor="black", width=0.95)
 
             for label in ax1.xaxis.get_ticklabels():
                 label.set_rotation(45)
@@ -125,6 +132,14 @@ class Application(QMainWindow):
 
             plt.yticks([1,2,3,4,5,6,7,8,9,10]) # Only shows the available Y values
             plt.subplots_adjust(left=0.097, bottom=0.23, right=0.977, top=0.922)
+
+            # Cursor Click Annotions
+            # This adds the functionality of showing mood descriptions for each day.
+            cursor = mplcursors.cursor(lines)
+            cursor.connect(
+                "add", 
+                lambda sel: sel.annotation.set_text(descriptions[sel.target.index]))
+
             plt.show()
 
 
