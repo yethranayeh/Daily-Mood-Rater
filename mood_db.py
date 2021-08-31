@@ -41,8 +41,17 @@ def update_values(mood:int, description=""):
                         WHERE date = :today""",
                         {"mood":mood, "desc":description, "today":str(datetime.now())[:10]})
 
-def show_values():
-    cursor.execute("SELECT * FROM moods")
+def show_values(date):
+    cursor.execute("""SELECT * FROM moods
+                    WHERE SUBSTR(date, 1, 7) == :date
+                    ORDER BY date""",
+                    {"date":date})
+    result = cursor.fetchall()
+
+    return result
+
+def current_months():
+    cursor.execute("SELECT DISTINCT SUBSTR(date, 1, 7) FROM moods ORDER BY date")
     result = cursor.fetchall()
 
     return result

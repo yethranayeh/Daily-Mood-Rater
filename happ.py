@@ -40,6 +40,11 @@ class Application(QMainWindow):
         # Create a chart from saved data
         self.ui.btn_chart.clicked.connect(self.show_graph)
 
+        # Populate ComboBox
+        current_months = [month[0] for month in mood_db.current_months()]
+        self.ui.comboBox_date.addItems(current_months)
+        self.ui.comboBox_date.setCurrentIndex(0)
+
     def label_update(self):
         self.ui.lbl_mood.setText(f"Rate Your Mood - {self.ui.slider_mood.sliderPosition()}")
 
@@ -95,18 +100,18 @@ class Application(QMainWindow):
             msg.setDefaultButton(QMessageBox.Ok)
 
     def show_graph(self):
-        values = mood_db.show_values()
+        # Get values for the selected month
+        values = mood_db.show_values(self.ui.comboBox_date.currentText())
 
         if not values:
             print("There are currently no mood ratings saved in database.")
         else:
             import matplotlib.pyplot as plt
             import mplcursors
-            print("\033[1;37;40mCurrent values in database:\033[0;37;40m")
+
             x = [x[2] for x in values]
             y = [y[0] for y in values]
             descriptions = [d[1] for d in values]
-            print("Descriptions:", descriptions)
             ax1 = plt.subplot2grid((1,1), (0,0))
 
             # print("x:", x)
@@ -131,7 +136,7 @@ class Application(QMainWindow):
             plt.title("Your Mood Rating Graph")
 
             plt.yticks([1,2,3,4,5,6,7,8,9,10]) # Only shows the available Y values
-            plt.subplots_adjust(left=0.097, bottom=0.23, right=0.977, top=0.922)
+            # plt.subplots_adjust(left=0.097, bottom=0.23, right=0.977, top=0.922)
 
             # Cursor Click Annotions
             # This adds the functionality of showing mood descriptions for each day.
