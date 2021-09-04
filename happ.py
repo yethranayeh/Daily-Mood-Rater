@@ -26,12 +26,10 @@ class Application(QMainWindow):
         # Icon customization: https://thenounproject.com/term/faces/4127357/
         self.setWindowIcon(self.icon)
         
-        #  TODO: Show current date on status bar
         self.setStatusTip(datetime.now().strftime("%A, %d %B, %Y"))
 
         self.ui.lbl_mood.setText(f"Rate Your Mood - {self.ui.slider_mood.sliderPosition()}")
         self.ui.textEdit_description.setToolTip("You can describe how you feel")
-
 
         ### Functionality ###
 
