@@ -30,6 +30,11 @@ these libraries also have their own dependencies, so using the included `require
 
 ## Features to be added
 
+#### Export Mood Data to CSV or Excel
+
+I am planning on adding options to export mood data to a `CSV` or `Excel` file.
+
+
 #### Custom Color Palettes
 
 Currently, the app has only 1 set of colors to visualize the mood scale. There will be more palettes in the upcoming updates.
