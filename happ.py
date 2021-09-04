@@ -1,12 +1,10 @@
 import sys, mood_db
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
 from PyQt5.QtGui import QIcon
 from interface import Ui_MainWindow
 from pathlib import Path
 
 cur_dir = Path.cwd()
-
-#TODO: Change button "Show Chart" to "Show Graph"
 
 #TODO: Check Qt event filter for these bugs.
     #BUG: Clicking on anywhere on the slider makes it go to either 0 or 10
@@ -99,54 +97,13 @@ class Application(QMainWindow):
             msg.setStandardButtons(QMessageBox.Ok)
             msg.setDefaultButton(QMessageBox.Ok)
 
+    #BUG: Descriptions are incorrectly matched with dates.
+    ### An entry for 2021-08-10 with description "Aug 10" shows up on 2021-08-09, the day before.
     def show_graph(self):
-        # Get values for the selected month
-        values = mood_db.show_values(self.ui.comboBox_date.currentText())
-
-        if not values:
-            print("There are currently no mood ratings saved in database.")
-        else:
-            import matplotlib.pyplot as plt
-            import mplcursors
-
-            x = [x[2] for x in values]
-            y = [y[0] for y in values]
-            descriptions = [d[1] for d in values]
-            ax1 = plt.subplot2grid((1,1), (0,0))
-
-            # print("x:", x)
-            # print("y:", y)
-
-            plt.ion() # This solves a Qt Exec error. Without this, more than 1 instance of QApplication is being attempted to run.
-
-            lines = ax1.bar(x, y, color="lightsteelblue", edgecolor="black", width=0.95)
-
-            for label in ax1.xaxis.get_ticklabels():
-                label.set_rotation(45)
-        
-            ax1.tick_params(axis="x", colors="tab:blue")
-            ax1.tick_params(axis="y", colors="tab:blue")
-
-            ax1.xaxis.label.set_color("tab:blue")
-            plt.xlabel("Days (Year - Month - Day)")
-
-            ax1.yaxis.label.set_color("tab:blue")
-            plt.ylabel("Mood Rating")
-
-            plt.title("Your Mood Rating Graph")
-
-            plt.yticks([1,2,3,4,5,6,7,8,9,10]) # Only shows the available Y values
-            # plt.subplots_adjust(left=0.097, bottom=0.23, right=0.977, top=0.922)
-
-            # Cursor Click Annotions
-            # This adds the functionality of showing mood descriptions for each day.
-            cursor = mplcursors.cursor(lines)
-            cursor.connect(
-                "add", 
-                lambda sel: sel.annotation.set_text(descriptions[sel.target.index]))
-
-            plt.show()
-
+        # Using a separate window to show Matplotlib Graph, Embedded into a QWidget window
+        import mood_graph
+        self.graph = mood_graph.AppWindow(self.ui.comboBox_date.currentText())
+        self.graph.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -154,13 +111,3 @@ if __name__ == "__main__":
     win = Application()
     win.show()
     sys.exit(app.exec_())
-
-
-# def app_window():
-#     app = QApplication(sys.argv)
-#     app.setStyle("Fusion")
-#     win = Application()
-#     win.show()
-#     sys.exit(app.exec_())
-
-# app_window()
