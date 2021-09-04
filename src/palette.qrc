@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="default">
+    <file>default_palette/1.png</file>
+    <file>default_palette/2.png</file>
+    <file>default_palette/3.png</file>
+    <file>default_palette/4.png</file>
+    <file>default_palette/5.png</file>
+    <file>default_palette/6.png</file>
+    <file>default_palette/7.png</file>
+    <file>default_palette/8.png</file>
+    <file>default_palette/9.png</file>
+    <file>default_palette/10.png</file>
+  </qresource>
+</RCC>

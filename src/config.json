@@ -1,0 +1,9 @@
+{
+    "theme" : "dark",
+    "icon" : {
+        "default" : "icon.png",
+        "dark" : "icon_dark.png"
+    
+    }
+
+}

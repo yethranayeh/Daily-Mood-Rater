@@ -1,11 +1,15 @@
-import sys, mood_db
+import sys, mood_db, json
 from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPalette, QColor 
 from interface import Ui_MainWindow
 from pathlib import Path
 
 cur_dir = Path.cwd()
+with open(cur_dir / "src/config.json", "r", encoding="utf-8") as cfg:
+    config = json.load(cfg)
+    theme = config["theme"]
+    icon = config["icon"][theme]
 
 #TODO: Check Qt event filter for these bugs.
     #BUG: Clicking on anywhere on the slider makes it go to either 0 or 10
@@ -17,7 +21,7 @@ class Application(QMainWindow):
         print("\033[1;35;40mStarting:\033[1;32;40m Daily Mood Rater\033[0;37;40m")
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.icon = QIcon((cur_dir / "test/icon.png").as_posix())
+        self.icon = QIcon((cur_dir / f"src/{icon}").as_posix())
 
         # Icon customization: https://thenounproject.com/term/faces/4127357/
         self.setWindowIcon(self.icon)
@@ -38,7 +42,7 @@ class Application(QMainWindow):
         self.ui.btn_save.clicked.connect(self.save_to_db)
 
         # Create a chart from saved data
-        self.ui.btn_chart.clicked.connect(self.show_graph)
+        self.ui.btn_graph.clicked.connect(self.show_graph)
 
         # Populate ComboBox
         self.comboBox_populate()
@@ -87,7 +91,7 @@ class Application(QMainWindow):
                 try:
                     mood_db.update_values(
                         self.ui.slider_mood.sliderPosition(),
-                        self.ui.textEdit_description.toPlainText()
+                        description
                     )
                     # TODO: Show Entry update was successful in status bar
                 except:
@@ -132,7 +136,20 @@ class Application(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+
+    # set stylesheet
+    if theme == "default":
+        app.setStyle("Fusion")
+    elif theme == "dark":
+        from PyQt5.QtCore import QFile, QTextStream
+        import src.breeze_resources
+        file = QFile(":/dark/stylesheet.qss")
+        file.open(QFile.ReadOnly | QFile.Text)
+        stream = QTextStream(file)
+        app.setStyleSheet(stream.readAll())
+    else:
+        print("No proper theme selected.")
+
     win = Application()
     win.show()
     sys.exit(app.exec_())
