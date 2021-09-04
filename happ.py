@@ -1,6 +1,7 @@
 # Credits
 # "faces" icon created by Vector Valley, PK from the Noun Project
 # https://thenounproject.com/term/faces/4127357/
+
 import sys, mood_db, json
 from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
@@ -13,10 +14,6 @@ with open(cur_dir / "src/config.json", "r", encoding="utf-8") as cfg:
     config = json.load(cfg)
     theme = config["theme"]
     icon = config["icon"][theme]
-
-#TODO: Check Qt event filter for these bugs.
-    #BUG: Clicking on anywhere on the slider makes it go to either 0 or 10
-    #BUG: Slider is scrollable with mouse scroll. Also, scrolling with mouse does not invoke sliderMoved, so the label does not update the text
 
 class Application(QMainWindow):
     def __init__(self):
@@ -32,24 +29,31 @@ class Application(QMainWindow):
         #  TODO: Show current date on status bar
         self.setStatusTip(datetime.now().strftime("%A, %d %B, %Y"))
 
-
         self.ui.lbl_mood.setText(f"Rate Your Mood - {self.ui.slider_mood.sliderPosition()}")
         self.ui.textEdit_description.setToolTip("You can describe how you feel")
 
 
         ### Functionality ###
-        self.ui.slider_mood.sliderMoved.connect(self.label_update)
 
-        self.ui.checkBox_mood.stateChanged.connect(self.enable_text)
-        
-        # Send slider position and description to database
-        self.ui.btn_save.clicked.connect(self.save_to_db)
-
-        # Create a chart from saved data
-        self.ui.btn_graph.clicked.connect(self.show_graph)
+        # Menubar
+        ## Theme
+        self.ui.actionDefault.triggered.connect(lambda: self.change_theme("default"))
+        self.ui.actionDark.triggered.connect(lambda: self.change_theme("dark"))
 
         # Populate ComboBox
         self.comboBox_populate()
+
+        # Update label when slider moves
+        self.ui.slider_mood.sliderMoved.connect(self.label_update)
+
+        # If checkbox is changed, either enable or disable text area
+        self.ui.checkBox_mood.stateChanged.connect(self.enable_text)
+        
+        # Send slider position (rating) and description to database
+        self.ui.btn_save.clicked.connect(self.save_to_db)
+
+        # Create a graph from saved data
+        self.ui.btn_graph.clicked.connect(self.show_graph)
 
     def comboBox_populate(self):
         self.current_months = [month[0] for month in mood_db.current_months()]
@@ -97,10 +101,9 @@ class Application(QMainWindow):
                         self.ui.slider_mood.sliderPosition(),
                         description
                     )
-                    # TODO: Show Entry update was successful in status bar
+                    self.ui.statusbar.showMessage("Entry overwrite was successful!", 4000)
                 except:
-                    # TODO: Show Entry update was unsuccessful in status bar
-                    pass
+                    self.ui.statusbar.showMessage("Error: Entry overwrite was unsuccessful!", 4000)
             elif response == QMessageBox.Cancel:
                 pass
             else:
@@ -136,6 +139,15 @@ class Application(QMainWindow):
             msg.setDefaultButton(QMessageBox.Ok)
 
             msg.exec_()
+
+    def change_theme(self, theme):
+        with open(cur_dir / "src/config.json", "r", encoding="utf-8") as cfg:
+            config = json.load(cfg)
+
+        config["theme"] = theme
+
+        with open(cur_dir / "src/config.json", "w", encoding="utf-8") as cfg:
+            config = json.dump(config, cfg)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
