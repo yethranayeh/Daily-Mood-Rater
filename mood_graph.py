@@ -3,6 +3,25 @@ import matplotlib.pyplot as plt
 import mplcursors
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtGui import QIcon
+from pathlib import Path
+
+cur_dir = Path.cwd()
+
+months = {
+    "01" : "January",
+    "02" : "February",
+    "03" : "March",
+    "04" : "April",
+    "05" : "May",
+    "06" : "June",
+    "07" : "July",
+    "08" : "August",
+    "09" : "September",
+    "10" : "October",
+    "11" : "November",
+    "12" : "December"
+}
 
 #BUG: Two bar values with the same Y value next to each other only display the annotation of the first one.
 
@@ -54,6 +73,8 @@ class AppWindow(QWidget):
         self.resize(1000, 400)
         self.setMaximumSize(1000, 400)
         self.setMinimumSize(1000, 400)
+        self.setWindowTitle(f"Mood Rating Graph for {months[date[5:]]} {date[:4]}")
+        self.setWindowIcon(QIcon((cur_dir / "test/icon.png").as_posix()))
 
         self.graph = Canvas(self, date)
 
