@@ -1,3 +1,6 @@
+# Credits
+# "faces" icon created by Vector Valley, PK from the Noun Project
+# https://thenounproject.com/term/faces/4127357/
 import sys, mood_db, json
 from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
