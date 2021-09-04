@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 
 try:
-    connection = sqlite3.connect("mood.db")
+    connection = sqlite3.connect("mood2.db")
 except Exception as err:
     print("\033[1;37;40mThe application faced a problem while trying to create or connect to the database:\033[0;37;40m")
     print("\033[1;31;40m", err, "\033[0;37;40m")

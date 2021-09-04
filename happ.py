@@ -17,9 +17,10 @@ class Application(QMainWindow):
         print("\033[1;35;40mStarting:\033[1;32;40m Daily Mood Rater\033[0;37;40m")
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.icon = QIcon((cur_dir / "test/icon.png").as_posix())
 
         # Icon customization: https://thenounproject.com/term/faces/4127357/
-        self.setWindowIcon(QIcon((cur_dir / "test/icon.png").as_posix()))
+        self.setWindowIcon(self.icon)
 
         #  TODO: Show current date on status bar
         # self.setStatusBar(QStatusBar(self).setStatusTip("string"))
@@ -40,9 +41,13 @@ class Application(QMainWindow):
         self.ui.btn_chart.clicked.connect(self.show_graph)
 
         # Populate ComboBox
-        current_months = [month[0] for month in mood_db.current_months()]
-        self.ui.comboBox_date.addItems(current_months)
-        self.ui.comboBox_date.setCurrentIndex(current_months.index(str(datetime.now())[:7]))
+        self.comboBox_populate()
+
+    def comboBox_populate(self):
+        self.current_months = [month[0] for month in mood_db.current_months()]
+        if self.current_months:
+            self.ui.comboBox_date.addItems(self.current_months)
+            self.ui.comboBox_date.setCurrentIndex(self.current_months.index(str(datetime.now())[:7]))
 
     def label_update(self):
         self.ui.lbl_mood.setText(f"Rate Your Mood - {self.ui.slider_mood.sliderPosition()}")
@@ -68,6 +73,7 @@ class Application(QMainWindow):
             msg = QMessageBox()
 
             msg.setWindowTitle("Overwrite current entry?")
+            msg.setWindowIcon(self.icon)
             msg.setText(f"There is already an existing entry for today. Would you like to overwrite it?")
             msg.setDetailedText(f"Mood Rating: {save[0]}\nDescription: {save[1]}\nDate: {save[2]}")
             msg.setIcon(QMessageBox.Warning)
@@ -95,16 +101,34 @@ class Application(QMainWindow):
             msg = QMessageBox()
 
             msg.setWindowTitle("Success!")
+            msg.setWindowIcon(self.icon)
             msg.setText("Your mood rating for today was successfully saved into the database.")
             msg.setIcon(QMessageBox.Information)
             msg.setStandardButtons(QMessageBox.Ok)
             msg.setDefaultButton(QMessageBox.Ok)
 
+            msg.exec_()
+            if not self.current_months:
+                self.comboBox_populate()
+
     def show_graph(self):
         # Using a separate window to show Matplotlib Graph, Embedded into a QWidget window
-        import mood_graph
-        self.graph = mood_graph.AppWindow(self.ui.comboBox_date.currentText())
-        self.graph.show()
+        if self.current_months:
+            import mood_graph
+            self.graph = mood_graph.AppWindow(self.ui.comboBox_date.currentText())
+            self.graph.show()
+        else:
+            msg = QMessageBox()
+
+            msg.setWindowTitle("Error!")
+            msg.setWindowIcon(self.icon)
+            msg.setText("There are currently no records available in the database.\nStart saving your mood ratings and they will show up the next time you click 'Show Graph' button")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setDefaultButton(QMessageBox.Ok)
+
+            msg.exec_()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

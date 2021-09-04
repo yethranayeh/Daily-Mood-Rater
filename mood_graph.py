@@ -25,7 +25,6 @@ months = {
 
 #BUG: Two bar values with the same Y value next to each other only display the annotation of the first one.
 
-print("Top side")
 class Canvas(FigureCanvas):
     def __init__(self, parent, date):
         self.fig, self.ax = plt.subplots(figsize=(10,4))
@@ -75,8 +74,6 @@ class AppWindow(QWidget):
         self.setWindowIcon(QIcon((cur_dir / "test/icon.png").as_posix()))
 
         self.graph = Canvas(self, date)
-
-print("Bottom Side")
 
 if __name__ == "__main__":
     print("Name Main")
