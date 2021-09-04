@@ -19,7 +19,7 @@ def create_table():
             date TEXT
             )""")
 
-def save_values(mood:int, description=""):
+def save_values(mood:int, description=" "):
     with connection:
         cursor.execute("SELECT * FROM moods WHERE date = :date", {"date":str(datetime.now())[:10]})
         result = cursor.fetchone()

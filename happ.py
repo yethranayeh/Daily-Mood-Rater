@@ -1,4 +1,5 @@
 import sys, mood_db
+from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
 from PyQt5.QtGui import QIcon
 from interface import Ui_MainWindow
@@ -41,7 +42,7 @@ class Application(QMainWindow):
         # Populate ComboBox
         current_months = [month[0] for month in mood_db.current_months()]
         self.ui.comboBox_date.addItems(current_months)
-        self.ui.comboBox_date.setCurrentIndex(0)
+        self.ui.comboBox_date.setCurrentIndex(current_months.index(str(datetime.now())[:7]))
 
     def label_update(self):
         self.ui.lbl_mood.setText(f"Rate Your Mood - {self.ui.slider_mood.sliderPosition()}")
@@ -53,10 +54,12 @@ class Application(QMainWindow):
             self.ui.textEdit_description.clear()
             self.ui.textEdit_description.setDisabled(True)
 
-    def save_to_db(self):        
+    def save_to_db(self):
+        textedit = self.ui.textEdit_description.toPlainText()
+        description = textedit if bool(self.ui.textEdit_description.toPlainText()) else " "
         save = mood_db.save_values(
                 self.ui.slider_mood.sliderPosition(),
-                self.ui.textEdit_description.toPlainText()
+                description
             )
 
         if save != 1:
@@ -97,8 +100,6 @@ class Application(QMainWindow):
             msg.setStandardButtons(QMessageBox.Ok)
             msg.setDefaultButton(QMessageBox.Ok)
 
-    #BUG: Descriptions are incorrectly matched with dates.
-    ### An entry for 2021-08-10 with description "Aug 10" shows up on 2021-08-09, the day before.
     def show_graph(self):
         # Using a separate window to show Matplotlib Graph, Embedded into a QWidget window
         import mood_graph
