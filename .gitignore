@@ -133,3 +133,4 @@ dmypy.json
 # other
 test.py
 test/
+*.qrc
