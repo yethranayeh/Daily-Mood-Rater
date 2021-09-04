@@ -28,9 +28,10 @@ class Application(QMainWindow):
 
         # Icon customization: https://thenounproject.com/term/faces/4127357/
         self.setWindowIcon(self.icon)
-
+        
         #  TODO: Show current date on status bar
-        # self.setStatusBar(QStatusBar(self).setStatusTip("string"))
+        self.setStatusTip(datetime.now().strftime("%A, %d %B, %Y"))
+
 
         self.ui.lbl_mood.setText(f"Rate Your Mood - {self.ui.slider_mood.sliderPosition()}")
         self.ui.textEdit_description.setToolTip("You can describe how you feel")
@@ -135,7 +136,6 @@ class Application(QMainWindow):
             msg.setDefaultButton(QMessageBox.Ok)
 
             msg.exec_()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
